@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 
 function App() {
-    const [currentSection, setCurrentSection] = useState(0)
     const [typedText, setTypedText] = useState('')
     const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0)
     const [showFireworks, setShowFireworks] = useState(false)
