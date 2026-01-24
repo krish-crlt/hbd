@@ -1,9 +1,15 @@
-import { useState, useEffect, useRef } from 'react'
+﻿import { useState, useEffect, useRef } from 'react'
 
 function App() {
+    const [musicStarted, setMusicStarted] = useState(false)
     const [typedText, setTypedText] = useState('')
     const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0)
     const [showFireworks, setShowFireworks] = useState(false)
+    const [showGift, setShowGift] = useState(false)
+    const [giftOpened, setGiftOpened] = useState(false)
+    const [showCake, setShowCake] = useState(false)
+    const [showMessage, setShowMessage] = useState(false)
+    const [showPhotoAlbum, setShowPhotoAlbum] = useState(false)
     const [countdown, setCountdown] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 })
     const [revealedSections, setRevealedSections] = useState(new Set())
     const audioRef = useRef(null)
@@ -19,7 +25,7 @@ function App() {
         { id: 1, src: "/first meet.jpg", caption: "Our First Meeting" },
         { id: 2, src: "/smileeee.jpg", caption: "That Beautiful Smile" },
         { id: 3, src: "/together.jpg", caption: "Adventures Together" },
-        { id: 4, src: "/memoriii.jpg", caption: "Making Memories" },
+        { id: 4, src: "/making-memories.png", caption: "Making Memories" },
         { id: 5, src: "/forever.jpg", caption: "Forever & Always" }
     ]
 
@@ -106,6 +112,12 @@ function App() {
                 createFirework()
             }, i * 100)
         }
+
+        // Show gift box after fireworks end (5 seconds)
+        setTimeout(() => {
+            setShowFireworks(false)
+            setShowGift(true)
+        }, 5000)
     }
 
     const createFirework = () => {
@@ -117,10 +129,53 @@ function App() {
         setTimeout(() => firework.remove(), 2000)
     }
 
+    const handleStartMusic = () => {
+        if (audioRef.current) {
+            audioRef.current.play()
+        }
+        setMusicStarted(true)
+    }
+
+    const handleGiftClick = () => {
+        setGiftOpened(true)
+        // Show cake after balloons fly up (3 seconds)
+        setTimeout(() => {
+            setShowCake(true)
+        }, 3000)
+    }
+
+    const handleCakeClick = () => {
+        setShowMessage(true)
+    }
+
+    const handleContinueToWebsite = () => {
+        setShowGift(false)
+        setShowPhotoAlbum(true)
+        // Scroll to photo album section after a short delay
+        setTimeout(() => {
+            document.querySelector('.photo-album-section')?.scrollIntoView({ behavior: 'smooth' })
+        }, 300)
+    }
+
     return (
         <div className="app">
+            {/* Music Splash Screen */}
+            {!musicStarted && (
+                <div className="music-splash">
+                    <div className="splash-content">
+                        <div className="splash-icon">🎵</div>
+                        <h1 className="splash-title">Welcome!</h1>
+                        <p className="splash-message">Click below to play music and continue</p>
+                        <button className="start-music-button" onClick={handleStartMusic}>
+                            Play Music & Continue 🎶
+                        </button>
+                    </div>
+                </div>
+            )}
+
             {/* Background Music */}
             <audio ref={audioRef} loop>
+                <source src="/bg-music.m4a" type="audio/mp4" />
                 <source src="/bg-music.mp3" type="audio/mpeg" />
             </audio>
 
@@ -251,11 +306,107 @@ function App() {
                 </div>
             </section>
 
+            {/* Photo Album Section */}
+            {showPhotoAlbum && (
+                <section className="photo-album-section reveal-section">
+                    <h2 className="section-title">Our Photo Album 📸</h2>
+                    <div className="photo-album-grid">
+                        {photos.map((photo) => (
+                            <div key={photo.id} className="album-photo-card">
+                                <img src={photo.src} alt={photo.caption} className="album-photo" />
+                                <p className="album-caption">{photo.caption}</p>
+                            </div>
+                        ))}
+                    </div>
+                </section>
+            )}
+
             {/* Fireworks Container */}
             {showFireworks && (
                 <div className="fireworks-container">
                     <div className="fireworks-overlay">
                         <h1 className="fireworks-text">🎊 Happy Birthday! 🎊</h1>
+                    </div>
+                </div>
+            )}
+
+            {/* Gift Box */}
+            {showGift && (
+                <div className="gift-container">
+                    <div className={`gift-box ${giftOpened ? 'opened' : ''}`} onClick={handleGiftClick}>
+                        {!giftOpened && (
+                            <>
+                                <div className="gift-bow">🎀</div>
+                                <div className="gift-body">
+                                    <div className="gift-ribbon-v"></div>
+                                    <div className="gift-ribbon-h"></div>
+                                    <div className="gift-lid">
+                                        <div className="gift-lid-ribbon"></div>
+                                    </div>
+                                    <div className="gift-base"></div>
+                                </div>
+                                <p className="tap-text">Tap to Open! 🎁</p>
+                            </>
+                        )}
+
+                        {giftOpened && (
+                            <>
+                                {/* Heart Balloons */}
+                                {[...Array(15)].map((_, i) => (
+                                    <div
+                                        key={i}
+                                        className="heart-balloon"
+                                        style={{
+                                            left: `${10 + Math.random() * 80}%`,
+                                            animationDelay: `${Math.random() * 0.5}s`,
+                                            '--balloon-color': ['#ff6b9d', '#ff1493', '#ff69b4', '#ff85c1', '#ffc0cb', '#ff6ba5'][i % 6]
+                                        }}
+                                    >
+                                        ❤️
+                                    </div>
+                                ))}
+
+                                {/* Birthday Cake */}
+                                {showCake && !showMessage && (
+                                    <div className="birthday-cake-container">
+                                        <div className="birthday-cake">
+                                            <img src="/birthday-cake.png" alt="Birthday Cake" className="cake-image" />
+                                        </div>
+                                        <button className="cake-tap-button" onClick={handleCakeClick}>
+                                            Tap to see the message 💌
+                                        </button>
+                                    </div>
+                                )}
+
+                                {/* Bengali Birthday Message */}
+                                {showMessage && (
+                                    <div className="bengali-message">
+                                        <h2 className="bengali-title">🎂🤍 শুভ জন্মদিন প্রিয় 🤍🎂</h2>
+                                        <div className="bengali-text">
+                                            <p>তুমি আমার জীবনের সেই শান্ত দুপুর,</p>
+                                            <p>যেখানে শব্দ কম আর অনুভূতি গভীর 🌙</p>
+                                            <p>তোমার হাসিতে আমার সব ক্লান্তি গলে যায়,</p>
+                                            <p>আর তোমার উপস্থিতিতেই আমার দিনটা সম্পূর্ণ হয় ✨</p>
+                                            <br />
+                                            <p>তুমি শুধু একজন মানুষ নও,</p>
+                                            <p>তুমি আমার অভ্যাস, আমার স্বস্তি, আমার নীরব ভালোবাসা 🤍</p>
+                                            <p>আজকের দিনটা হোক ঠিক তোমার মতোই—</p>
+                                            <p>নরম, সুন্দর আর আলোয় ভরা 🌸</p>
+                                            <br />
+                                            <p>ঈশ্বর যেন তোমার প্রতিটি স্বপ্ন ছুঁয়ে দেন,</p>
+                                            <p>আর আমার হাতটা যেন সবসময় তোমার হাতেই থাকে 💫</p>
+                                            <p>সবসময় এমনই থেকো, প্রিয়—</p>
+                                            <p>আমার সবচেয়ে সুন্দর গল্প 🤍🌷</p>
+                                            <br />
+                                            <p className="english-text">Happy Birthday Dear 🎈✨</p>
+                                        </div>
+                                        <button className="continue-website-button" onClick={handleContinueToWebsite}>
+                                            Continue to Website & Photo Album 📸
+                                        </button>
+                                    </div>
+                                )}
+                            </>
+                        )}
                     </div>
                 </div>
             )}
